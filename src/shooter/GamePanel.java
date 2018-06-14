@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 public class GamePanel extends JPanel implements Runnable{
     private static final int WINDOW_WIDTH = 600;
     private static final int WINDOW_HEIGHT = 600;
+    private static final double FPS = 30;
     private Thread thread;
     private boolean isRunning;
     private BufferedImage canvas;
@@ -49,14 +50,48 @@ public class GamePanel extends JPanel implements Runnable{
         this.g2d = (Graphics2D)this.canvas.getGraphics();
         
         //Game loop
+        System.nanoTime();
+        final double frameTime = 1.0f / FPS; 
+        long startTime, endTime;
+        double timeSinceLastUpdate = 0;
+        double elapsedTime = 0;
         while(this.isRunning){
-            gameUpdate();
+            startTime = System.nanoTime();
+            System.out.println("startTime = " + startTime);
+            timeSinceLastUpdate += elapsedTime;
+            System.out.println("timeSinceLastUpdate = " + timeSinceLastUpdate);
+            while(timeSinceLastUpdate > frameTime){
+                gameUpdate(frameTime);
+                timeSinceLastUpdate -= frameTime;
+            }
             gameRender();
             gameDraw();
+            endTime = System.nanoTime();
+            System.out.println("endTime = " + endTime);
+            elapsedTime = (endTime - startTime) * 1e-9;
+            System.out.println("Elapsed time = " + elapsedTime);
         }
+        
+        /*
+        sf::Clock clock;
+    sf::Time timeSinceLastUpdate = sf::Time::Zero;
+    while(mWindow.isOpen())
+    {
+        auto elapsedTime = clock.restart();
+        timeSinceLastUpdate += elapsedTime;
+        while(timeSinceLastUpdate > mFrameTime)
+        {
+            timeSinceLastUpdate -= mFrameTime;
+            processEvents();
+            update(mFrameTime);
+        }
+        updateStatistics(elapsedTime);
+        render();
+    }
+        */
     }
     
-    private void gameUpdate(){
+    private void gameUpdate(double frameTime){
         
     }
     
