@@ -106,51 +106,35 @@ public class GamePanel extends JPanel implements KeyListener, Runnable{
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
         if(keyCode == KeyEvent.VK_LEFT){
-            this.player.setDirection(Direction.LEFT);
+            this.player.setIsMovingLeft(true);
         }
         if(keyCode == KeyEvent.VK_RIGHT){
-            this.player.setDirection(Direction.RIGHT);
+            this.player.setIsMovingRight(true);
         }
         if(keyCode == KeyEvent.VK_UP){
-            this.player.setDirection(Direction.UP);
+            this.player.setIsMovingUp(true);
         }
         if(keyCode == KeyEvent.VK_DOWN){
-            this.player.setDirection(Direction.DOWN);
+            this.player.setIsMovingDown(true);
         }
-        /*
-        switch(e.getKeyCode()){
-            case KeyEvent.VK_LEFT:
-                this.player.setDirection(Direction.LEFT);
-                System.out.println("Left pressed");
-                break;
-            case KeyEvent.VK_RIGHT:
-                this.player.setDirection(Direction.RIGHT);
-                System.out.println("Right pressed");
-                break;
-            case KeyEvent.VK_UP:
-                this.player.setDirection(Direction.UP);
-                System.out.println("Up pressed");
-                break;
-            case KeyEvent.VK_DOWN:
-                this.player.setDirection(Direction.DOWN);
-                System.out.println("Down pressed");
-                break;
-        }
-        */
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        switch(e.getKeyCode()){
-            case KeyEvent.VK_LEFT:
-            case KeyEvent.VK_RIGHT:
-            case KeyEvent.VK_UP:
-            case KeyEvent.VK_DOWN:
-                this.player.setDirection(Direction.NO);
-                break;
-            /*default:
-                e.consume();*/
+        int keyCode = e.getKeyCode();
+        if(keyCode == KeyEvent.VK_LEFT){
+            this.player.setIsMovingLeft(false);
         }
+        if(keyCode == KeyEvent.VK_RIGHT){
+            this.player.setIsMovingRight(false);
+        }
+        if(keyCode == KeyEvent.VK_UP){
+            this.player.setIsMovingUp(false);
+        }
+        if(keyCode == KeyEvent.VK_DOWN){
+            this.player.setIsMovingDown(false);
+        }
+
     }
     
 }

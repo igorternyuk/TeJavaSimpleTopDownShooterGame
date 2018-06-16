@@ -14,6 +14,10 @@ public class Player {
     private double vx, vy;
     private double speed;
     private Direction direction = Direction.NO;
+    private boolean isMovingUp = false;
+    private boolean isMovingDown = false;
+    private boolean isMovingLeft = false;
+    private boolean isMovingRight = false;
     private int lives;
     private Color color1 = Color.white;
     private Color color2 = Color.gray;
@@ -35,11 +39,41 @@ public class Player {
     public void setDirection(Direction direction) {
         this.direction = direction;
     }
+
+    public void setIsMovingUp(boolean isMovingUp) {
+        this.isMovingUp = isMovingUp;
+    }
+
+    public void setIsMovingDown(boolean isMovingDown) {
+        this.isMovingDown = isMovingDown;
+    }
+
+    public void setIsMovingLeft(boolean isMovingLeft) {
+        this.isMovingLeft = isMovingLeft;
+    }
+
+    public void setIsMovingRight(boolean isMovingRight) {
+        this.isMovingRight = isMovingRight;
+    }
     
     public void update(double frameTime){
-        this.vx = this.speed * this.direction.getDx() * frameTime;
-        this.vy = this.speed * this.direction.getDy() * frameTime;
+        //this.vx = this.speed * this.direction.getDx() * frameTime;
+        //this.vy = this.speed * this.direction.getDy() * frameTime;
         //System.out.println("vx = " + vx + " vy = " + vy);
+        
+        if(this.isMovingLeft){
+            this.vx = -this.speed * frameTime;
+        } else if(this.isMovingRight){
+            this.vx = this.speed * frameTime;
+        }
+        
+        if(this.isMovingUp){
+            this.vy = -this.speed * frameTime;
+        } else if(this.isMovingDown){
+            this.vy = this.speed * frameTime;
+        }
+        
+        
         this.x += this.vx;
         this.y += this.vy;
         keepInBounds();

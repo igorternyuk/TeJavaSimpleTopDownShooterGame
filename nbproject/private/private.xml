@@ -5,6 +5,8 @@
         <group>
             <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/Game.java</file>
             <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/GamePanel.java</file>
+            <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/Direction.java</file>
+            <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/Player.java</file>
         </group>
     </open-files>
 </project-private>
