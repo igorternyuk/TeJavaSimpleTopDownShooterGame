@@ -8,6 +8,7 @@ import java.util.List;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
@@ -25,19 +26,25 @@ public class Game extends JPanel implements KeyListener, Runnable{
     private Thread thread;
     private boolean isRunning;
     private BufferedImage canvas;
-    private Graphics2D g2d;
-    private Font smallFont = new Font("Tahoma", Font.BOLD, 20);
+    private Graphics2D g2;
+    private Font fontSmall = new Font("Tahoma", Font.BOLD, 20);
+    private Font fontLarge = new Font("Verdana", Font.BOLD | Font.ITALIC, 40);
     private Color colorBackground = new Color(0,148,255);
+    private Color colorPlayersLife = Color.green;
+    private Color colorWave = Color.white;
     private List<Entity> entities = new ArrayList<>();
     private Player player;
-    
+    private long waveDelay = 2000;
+    private long waveStartTime = 0;
+    private long waveTimeDiff = 0;
+    private boolean waveStarted = false;
+    private int waveNumber = 0;
     
     public Game() {
         super();
         initGUI();
         this.player = new Player(this);
         this.entities.add(this.player);  
-        createEnemies();
     }
 
     public List<Entity> getEntities() {
@@ -65,7 +72,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
         this.isRunning = true;
         this.canvas = new BufferedImage(WINDOW_WIDTH, WINDOW_HEIGHT,
                 BufferedImage.TYPE_INT_RGB);
-        this.g2d = (Graphics2D)this.canvas.getGraphics();
+        this.g2 = (Graphics2D)this.canvas.getGraphics();
         
         //Game loop
         System.nanoTime();
@@ -73,6 +80,11 @@ public class Game extends JPanel implements KeyListener, Runnable{
         long startTime, endTime;
         double timeSinceLastUpdate = 0;
         double elapsedTime = 0;
+        
+        this.waveStartTime = 0;
+        this.waveTimeDiff = 0;
+        this.waveStarted = false;
+        
         while(this.isRunning){
             startTime = System.nanoTime();
             //System.out.println("startTime = " + startTime);
@@ -92,7 +104,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
     }
     
     private void createEnemies(){
-        for(int i = 0; i < 5; ++i){
+        for(int i = 0; i < 2 * this.waveNumber; ++i){
             EnemyType randomEnemyType = 
                     EnemyType.values()[random.nextInt(EnemyType.values().length)];
             this.entities.add(new Enemy(this, randomEnemyType));
@@ -126,35 +138,75 @@ public class Game extends JPanel implements KeyListener, Runnable{
     }
     
     private void gameUpdate(final double frameTime){
+        long enemyCount = this.entities.stream()
+                .filter(e -> e instanceof Enemy).count();
+        if(this.waveStartTime == 0 && enemyCount == 0){
+            ++this.waveNumber;
+            this.waveStarted = false;
+            this.waveStartTime = System.nanoTime();
+        } else {
+            this.waveTimeDiff = (System.nanoTime() - this.waveStartTime) / 1000000;
+            if(this.waveTimeDiff > this.waveDelay){
+                this.waveStarted = true;
+                this.waveStartTime = 0;
+                this.waveTimeDiff = 0;
+            }
+        }
+        
+        if(this.waveStarted && enemyCount == 0){
+            createEnemies();
+        }
         this.entities.removeIf(e -> !e.isAlive());
-        //this.entities.forEach(e -> e.update(frameTime));
-        /*Iterator<Entity> it = this.entities.iterator();
-        while(it.hasNext()){
-            Entity e = it.next();
-            e.update(frameTime);
-        }*/
         for(int i = this.entities.size() - 1; i >= 0; --i){
             this.entities.get(i).update(frameTime);
         }
         checkCollisions();
-        
         //System.out.println("Entity count = " + this.entities.size());
     }
     
     private void gameRender(){
-        this.g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+        this.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
-        this.g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+        this.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                     RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        this.g2d.setColor(this.colorBackground);
-        this.g2d.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        this.entities.forEach(e -> e.draw(g2d));
+        this.g2.setColor(this.colorBackground);
+        this.g2.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        this.entities.forEach(e -> e.draw(g2));
+        drawPlayerLifes();
+        drawWave();        
+    }
+    
+    private void drawWave(){
+        if(this.waveStartTime != 0){
+            g2.setFont(fontLarge);
+            String message = " - WAVE - " + this.waveNumber;
+            Rectangle2D rect = g2.getFontMetrics().getStringBounds(message, g2);
+            int messageHeight = (int)rect.getHeight();
+            int messageWidth = (int)rect.getWidth();
+            int alpha = (int)(255 * Math.sin(Math.PI
+                    * this.waveTimeDiff / this.waveDelay));
+            if(alpha < 0) alpha = 0;
+            if(alpha > 255) alpha = 255;
+            g2.setColor(new Color(colorWave.getRed(), colorWave.getGreen(),
+                    colorWave.getBlue(), alpha));
+            g2.drawString(message, (WINDOW_WIDTH - messageWidth) / 2,
+                   (WINDOW_HEIGHT - messageHeight) / 2);
+            
+        }
+    }
+    
+    private void drawPlayerLifes(){
+        int lifeCount = this.player.getLives();
+        g2.setColor(colorPlayersLife);
+        for(int i = 0; i < lifeCount; ++i){
+            g2.fillOval(40 * (i + 1), 40, 30, 30);
+        }
     }
     
     private void gameDraw(){
-        Graphics2D g2 = (Graphics2D)this.getGraphics();
-        g2.drawImage(canvas, 0, 0, null);
-        g2.dispose();
+        Graphics2D g2d = (Graphics2D)this.getGraphics();
+        g2d.drawImage(canvas, 0, 0, null);
+        g2d.dispose();
     }
 
     @Override
@@ -195,7 +247,5 @@ public class Game extends JPanel implements KeyListener, Runnable{
         if(keyCode == KeyEvent.VK_SPACE){
             this.player.setIsFiring(false);
         }
-
     }
-    
 }

@@ -41,6 +41,10 @@ public class Entity {
     public int getRadius() {
         return radius;
     }
+
+    public int getLives() {
+        return lives;
+    }
     
     public boolean isOutOfBounds(){
         return this.x < this.radius
