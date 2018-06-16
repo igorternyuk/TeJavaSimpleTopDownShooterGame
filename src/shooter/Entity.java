@@ -1,5 +1,6 @@
 package shooter;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -14,9 +15,10 @@ public class Entity {
     protected double speed;
     protected int lives;
     protected double vx, vy;
-    protected Color color = Color.white;
+    protected Color color;
     
-    public Entity(Game game, double x, double y, int radius, double speed, int lives) {
+    public Entity(Game game, double x, double y, int radius, double speed,
+            int lives, Color color) {
         this.game = game;
         this.x = x;
         this.y = y;
@@ -25,6 +27,19 @@ public class Entity {
         this.lives = lives;
         this.vx = 0;
         this.vy = 0;
+        this.color = color;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public int getRadius() {
+        return radius;
     }
     
     public boolean isOutOfBounds(){
@@ -49,19 +64,36 @@ public class Entity {
             this.y = Game.WINDOW_HEIGHT - this.radius;
     }
     
+    public void bounceFromWalls(){
+        if((this.x < this.radius && this.vx < 0)
+           || (this.x + this.radius > Game.WINDOW_WIDTH && this.vx > 0)){
+            this.vx *= -1;
+        }
+        
+        if((this.y < this.radius && this.vy < 0)
+           || (this.y + this.radius > Game.WINDOW_HEIGHT && this.vx > 0)){
+            this.vy *= -1;
+        }
+    }
+    
     public void resetVelocityComponents(){
         this.vx = 0;
         this.vy = 0;
     }
     
     public void update(double frameTime){
-        this.x += this.vx;
-        this.y += this.vy;
+        this.x += this.vx * frameTime;
+        this.y += this.vy * frameTime;
     }
     
     public void draw(Graphics2D g){
         g.setColor(color);
         g.fillOval((int)this.x - this.radius, (int)this.y - this.radius,
                 2 * this.radius, 2 * this.radius);
+        g.setStroke(new BasicStroke(3));
+        g.setColor(color.darker());
+        g.drawOval((int)this.x - this.radius, (int)this.y - this.radius,
+                2 * this.radius, 2 * this.radius);
+        g.setStroke(new BasicStroke(1));
     }
 }

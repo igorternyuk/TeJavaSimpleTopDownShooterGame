@@ -10,7 +10,7 @@ import java.awt.Graphics2D;
  */
 public class Player extends Entity{
     private static final int RADIUS = 16;
-    private static final int BULLET_SPEED = 25;
+    private static final int BULLET_SPEED = 125;
     private boolean isMovingUp = false;
     private boolean isMovingDown = false;
     private boolean isMovingLeft = false;
@@ -18,12 +18,10 @@ public class Player extends Entity{
     private boolean isFiring = false;
     private long lastShotTime = System.nanoTime();
     private long shotDelay = 200;
-    private Color color1 = Color.white;
-    private Color color2 = Color.gray;
 
     public Player(Game game) {
         super(game, Game.WINDOW_WIDTH / 2, Game.WINDOW_HEIGHT / 2,
-              RADIUS, 100, 3);
+              RADIUS, 100, 3, Color.lightGray);
     }
 
     public void setIsMovingUp(boolean isMovingUp) {
@@ -49,15 +47,15 @@ public class Player extends Entity{
     @Override
     public void update(double frameTime){
         if(this.isMovingLeft){
-            this.vx = -this.speed * frameTime;
+            this.vx = -this.speed;
         } else if(this.isMovingRight){
-            this.vx = this.speed * frameTime;
+            this.vx = this.speed;
         }
         
         if(this.isMovingUp){
-            this.vy = -this.speed * frameTime;
+            this.vy = -this.speed;
         } else if(this.isMovingDown){
-            this.vy = this.speed * frameTime;
+            this.vy = this.speed;
         }
         
         super.update(frameTime);
@@ -71,17 +69,5 @@ public class Player extends Entity{
                 this.lastShotTime = System.nanoTime();
             }
         }
-    }
-
-    @Override
-    public void draw(Graphics2D g){
-        g.setColor(color1);
-        g.fillOval((int)this.x - this.radius, (int)this.y - this.radius,
-                2 * this.radius, 2 * this.radius);
-        g.setStroke(new BasicStroke(3));
-        g.setColor(color2);
-        g.drawOval((int)this.x - this.radius, (int)this.y - this.radius,
-                2 * this.radius, 2 * this.radius);
-        g.setStroke(new BasicStroke(1));
     }
 }

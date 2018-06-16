@@ -10,6 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.stream.Collectors;
 import javax.swing.JPanel;
 
@@ -21,6 +22,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
     static final int WINDOW_WIDTH = 600;
     static final int WINDOW_HEIGHT = 600;
     private static final double FPS = 30;
+    private Random random = new Random();
     private Thread thread;
     private boolean isRunning;
     private BufferedImage canvas;
@@ -30,11 +32,13 @@ public class Game extends JPanel implements KeyListener, Runnable{
     private List<Entity> entities = new ArrayList<>();
     private Player player;
     
+    
     public Game() {
         super();
         initGUI();
         this.player = new Player(this);
-        this.entities.add(this.player);        
+        this.entities.add(this.player);  
+        createEnemies();
     }
 
     public List<Entity> getEntities() {
@@ -85,6 +89,14 @@ public class Game extends JPanel implements KeyListener, Runnable{
             //System.out.println("endTime = " + endTime);
             elapsedTime = (endTime - startTime) * 1e-9;
             //System.out.println("Elapsed time = " + elapsedTime);
+        }
+    }
+    
+    private void createEnemies(){
+        for(int i = 0; i < 5; ++i){
+            EnemyType randomEnemyType = 
+                    EnemyType.values()[random.nextInt(EnemyType.values().length)];
+            this.entities.add(new Enemy(this, randomEnemyType));
         }
     }
     
