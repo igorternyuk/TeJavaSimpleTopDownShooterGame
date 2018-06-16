@@ -46,6 +46,14 @@ public class Entity {
         return lives;
     }
     
+        public void hit(){
+        --this.lives;
+    }
+    
+    public void hit(int damage){
+        this.lives -= damage;
+    }
+    
     public boolean isOutOfBounds(){
         return this.x < this.radius
                || this.x + this.radius > Game.WINDOW_WIDTH

@@ -27,7 +27,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
     private boolean isRunning;
     private BufferedImage canvas;
     private Graphics2D g2;
-    private Font fontSmall = new Font("Tahoma", Font.BOLD, 20);
+    private Font fontSmall = new Font("Tahoma", Font.BOLD, 24);
     private Font fontLarge = new Font("Verdana", Font.BOLD | Font.ITALIC, 40);
     private Color colorBackground = new Color(0,148,255);
     private Color colorPlayersLife = Color.green;
@@ -122,6 +122,9 @@ public class Game extends JPanel implements KeyListener, Runnable{
                         Bullet b = (Bullet)first;
                         Enemy e = (Enemy)second;
                         e.hit(b.getDamage());
+                        if(!e.isAlive()){
+                            this.player.addScore(e.getRank());
+                        }
                         b.destroy();
                     }
 
@@ -129,8 +132,21 @@ public class Game extends JPanel implements KeyListener, Runnable{
                         Bullet b = (Bullet)second;
                         Enemy e = (Enemy)first;
                         e.hit(b.getDamage());
+                        if(!e.isAlive()){
+                            this.player.addScore(e.getRank());
+                        }
                         b.destroy();
                     }
+                    break;
+                }
+            }
+        }
+        
+        for(int i = 0; i < this.entities.size(); ++i){
+            Entity e = this.entities.get(i);
+            if(!this.player.equals(e) && e instanceof Enemy){
+                if(e.collides(this.player) && !this.player.isRecovering()){
+                    this.player.hit();
                     break;
                 }
             }
@@ -173,6 +189,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
         this.g2.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         this.entities.forEach(e -> e.draw(g2));
         drawPlayerLifes();
+        drawPlayerScore();
         drawWave();        
     }
     
@@ -203,6 +220,14 @@ public class Game extends JPanel implements KeyListener, Runnable{
         }
     }
     
+    private void drawPlayerScore(){
+        g2.setFont(fontSmall);
+        g2.setColor(Color.pink);
+        String scoreStr = "SCORE: " + this.player.getScore();
+        int width = (int)g2.getFontMetrics().getStringBounds(scoreStr, g2).getWidth();
+        g2.drawString(scoreStr, WINDOW_WIDTH - width - 5, 30);
+    }
+    
     private void gameDraw(){
         Graphics2D g2d = (Graphics2D)this.getGraphics();
         g2d.drawImage(canvas, 0, 0, null);
@@ -216,18 +241,18 @@ public class Game extends JPanel implements KeyListener, Runnable{
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
         if(keyCode == KeyEvent.VK_LEFT){
-            this.player.setIsMovingLeft(true);
+            this.player.setMovingLeft(true);
         } else if(keyCode == KeyEvent.VK_RIGHT){
-            this.player.setIsMovingRight(true);
+            this.player.setMovingRight(true);
         }
         if(keyCode == KeyEvent.VK_UP){
-            this.player.setIsMovingUp(true);
+            this.player.setMovingUp(true);
         } else if(keyCode == KeyEvent.VK_DOWN){
-            this.player.setIsMovingDown(true);
+            this.player.setMovingDown(true);
         }
         
         if(keyCode == KeyEvent.VK_SPACE){
-            this.player.setIsFiring(true);
+            this.player.setFiring(true);
         }
     }
 
@@ -235,17 +260,17 @@ public class Game extends JPanel implements KeyListener, Runnable{
     public void keyReleased(KeyEvent e) {
         int keyCode = e.getKeyCode();
         if(keyCode == KeyEvent.VK_LEFT){
-            this.player.setIsMovingLeft(false);
+            this.player.setMovingLeft(false);
         } else if(keyCode == KeyEvent.VK_RIGHT){
-            this.player.setIsMovingRight(false);
+            this.player.setMovingRight(false);
         }
         if(keyCode == KeyEvent.VK_UP){
-            this.player.setIsMovingUp(false);
+            this.player.setMovingUp(false);
         } else if(keyCode == KeyEvent.VK_DOWN){
-            this.player.setIsMovingDown(false);
+            this.player.setMovingDown(false);
         }
         if(keyCode == KeyEvent.VK_SPACE){
-            this.player.setIsFiring(false);
+            this.player.setFiring(false);
         }
     }
 }
