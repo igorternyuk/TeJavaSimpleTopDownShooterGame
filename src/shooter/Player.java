@@ -8,36 +8,22 @@ import java.awt.Graphics2D;
  *
  * @author igor
  */
-public class Player {
-    private double x, y;
-    private int radius;
-    private double vx, vy;
-    private double speed;
-    private Direction direction = Direction.NO;
+public class Player extends Entity{
+    private static final int RADIUS = 16;
+    private static final int BULLET_SPEED = 25;
     private boolean isMovingUp = false;
     private boolean isMovingDown = false;
     private boolean isMovingLeft = false;
     private boolean isMovingRight = false;
-    private int lives;
+    private boolean isFiring = false;
+    private long lastShotTime = System.nanoTime();
+    private long shotDelay = 200;
     private Color color1 = Color.white;
     private Color color2 = Color.gray;
 
-    public Player() {
-        this.x = GamePanel.WINDOW_WIDTH / 2;
-        this.y = GamePanel.WINDOW_HEIGHT / 2;
-        this.radius = 30;
-        this.vx = 0;
-        this.vy = 0;
-        this.speed = 100;
-        this.lives = 3;
-    }
-
-    public Direction getDirection() {
-        return direction;
-    }
-
-    public void setDirection(Direction direction) {
-        this.direction = direction;
+    public Player(Game game) {
+        super(game, Game.WINDOW_WIDTH / 2, Game.WINDOW_HEIGHT / 2,
+              RADIUS, 100, 3);
     }
 
     public void setIsMovingUp(boolean isMovingUp) {
@@ -55,12 +41,13 @@ public class Player {
     public void setIsMovingRight(boolean isMovingRight) {
         this.isMovingRight = isMovingRight;
     }
+
+    public void setIsFiring(boolean isFiring) {
+        this.isFiring = isFiring;
+    }
     
+    @Override
     public void update(double frameTime){
-        //this.vx = this.speed * this.direction.getDx() * frameTime;
-        //this.vy = this.speed * this.direction.getDy() * frameTime;
-        //System.out.println("vx = " + vx + " vy = " + vy);
-        
         if(this.isMovingLeft){
             this.vx = -this.speed * frameTime;
         } else if(this.isMovingRight){
@@ -73,35 +60,28 @@ public class Player {
             this.vy = this.speed * frameTime;
         }
         
-        
-        this.x += this.vx;
-        this.y += this.vy;
+        super.update(frameTime);
         keepInBounds();
-        this.vx = 0;
-        this.vy = 0;
+        resetVelocityComponents();
+        
+        if(this.isFiring){
+            if((System.nanoTime() - this.lastShotTime) / 1000000 > this.shotDelay){
+                this.game.getEntities().add(new Bullet(this.game, this.x,
+                        this.y, BULLET_SPEED, -90));
+                this.lastShotTime = System.nanoTime();
+            }
+        }
     }
-    
-    private void keepInBounds(){
-        if(this.x < this.radius)
-            this.x = this.radius;
-        else if(this.x + this.radius > GamePanel.WINDOW_WIDTH)
-            this.x = GamePanel.WINDOW_WIDTH - this.radius;
-        if(this.y < this.radius)
-            this.y = this.radius;
-        else if(this.y + this.radius > GamePanel.WINDOW_HEIGHT)
-            this.y = GamePanel.WINDOW_HEIGHT - this.radius;
-    }
-    
+
+    @Override
     public void draw(Graphics2D g){
         g.setColor(color1);
         g.fillOval((int)this.x - this.radius, (int)this.y - this.radius,
-                this.radius, this.radius);
+                2 * this.radius, 2 * this.radius);
         g.setStroke(new BasicStroke(3));
         g.setColor(color2);
         g.drawOval((int)this.x - this.radius, (int)this.y - this.radius,
-                this.radius, this.radius);
+                2 * this.radius, 2 * this.radius);
         g.setStroke(new BasicStroke(1));
     }
-    
-    
 }
