@@ -8,11 +8,17 @@ import java.awt.Color;
  */
 public class Bullet extends Entity{
     private static final int RADIUS = 5;
-    public Bullet(Game game, double x, double y, double speed, double angle) {
+    private int damage; 
+    public Bullet(Game game, double x, double y, double speed, double angle,
+            int damage) {
         super(game, x, y, RADIUS, speed, 1, Color.yellow);
+        this.damage = damage;
         this.vx = this.speed * Math.cos(Math.toRadians(angle));
         this.vy = this.speed * Math.sin(Math.toRadians(angle));
-        this.color = Color.yellow;
+    }
+
+    public int getDamage() {
+        return damage;
     }
     
     public void destroy(){

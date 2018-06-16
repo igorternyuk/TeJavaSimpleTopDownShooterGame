@@ -1,8 +1,6 @@
 package shooter;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics2D;
 
 /**
  *
@@ -11,6 +9,7 @@ import java.awt.Graphics2D;
 public class Player extends Entity{
     private static final int RADIUS = 16;
     private static final int BULLET_SPEED = 125;
+    private static final int BULLET_DAMAGE = 1;
     private boolean isMovingUp = false;
     private boolean isMovingDown = false;
     private boolean isMovingLeft = false;
@@ -65,7 +64,7 @@ public class Player extends Entity{
         if(this.isFiring){
             if((System.nanoTime() - this.lastShotTime) / 1000000 > this.shotDelay){
                 this.game.getEntities().add(new Bullet(this.game, this.x,
-                        this.y, BULLET_SPEED, -90));
+                        this.y, BULLET_SPEED, -90, BULLET_DAMAGE));
                 this.lastShotTime = System.nanoTime();
             }
         }

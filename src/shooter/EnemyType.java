@@ -7,9 +7,9 @@ import java.awt.Color;
  * @author igor
  */
 public enum EnemyType {
-    WEAK(Color.blue, 10, 18, 1),
-    MIDDLE(Color.orange, 15, 24, 2),
-    STRONG(Color.pink, 20, 36, 3);
+    WEAK(Color.blue, 10, 20, 1),
+    MIDDLE(Color.orange, 15, 30, 2),
+    STRONG(Color.pink, 20, 40, 3);
     
     private Color color;
     private int radius;

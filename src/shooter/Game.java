@@ -11,7 +11,6 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.stream.Collectors;
 import javax.swing.JPanel;
 
 /**
@@ -100,12 +99,46 @@ public class Game extends JPanel implements KeyListener, Runnable{
         }
     }
     
+    private void checkCollisions(){
+        for(int i = 0; i < this.entities.size(); ++i){
+            inner:
+            for(int j = i + 1; j < this.entities.size(); ++j){
+                Entity first = this.entities.get(i);
+                Entity second = this.entities.get(j);
+                if(first.collides(second)){
+                    if(first instanceof Bullet && second instanceof Enemy){
+                        Bullet b = (Bullet)first;
+                        Enemy e = (Enemy)second;
+                        e.hit(b.getDamage());
+                        b.destroy();
+                    }
+
+                    if(first instanceof Enemy && second instanceof Bullet){
+                        Bullet b = (Bullet)second;
+                        Enemy e = (Enemy)first;
+                        e.hit(b.getDamage());
+                        b.destroy();
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    
     private void gameUpdate(final double frameTime){
-        this.player.update(frameTime);
-        this.entities = this.entities.stream().filter(e -> e.isAlive())
-                .collect(Collectors.toList());
-        this.entities.forEach(e -> e.update(frameTime));
-        System.out.println("Entity count = " + this.entities.size());
+        this.entities.removeIf(e -> !e.isAlive());
+        //this.entities.forEach(e -> e.update(frameTime));
+        /*Iterator<Entity> it = this.entities.iterator();
+        while(it.hasNext()){
+            Entity e = it.next();
+            e.update(frameTime);
+        }*/
+        for(int i = this.entities.size() - 1; i >= 0; --i){
+            this.entities.get(i).update(frameTime);
+        }
+        checkCollisions();
+        
+        //System.out.println("Entity count = " + this.entities.size());
     }
     
     private void gameRender(){

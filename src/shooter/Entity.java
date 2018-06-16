@@ -53,6 +53,13 @@ public class Entity {
         return this.lives > 0;
     }
     
+    public boolean collides(Entity other){
+        double dx = this.x - other.x;
+        double dy = this.y - other.y;
+        double radiusSumm = this.radius + other.radius;
+        return dx * dx + dy * dy <= radiusSumm * radiusSumm;
+    }
+    
     public void keepInBounds(){
         if(this.x < this.radius)
             this.x = this.radius;
@@ -71,7 +78,7 @@ public class Entity {
         }
         
         if((this.y < this.radius && this.vy < 0)
-           || (this.y + this.radius > Game.WINDOW_HEIGHT && this.vx > 0)){
+           || (this.y + this.radius > Game.WINDOW_HEIGHT && this.vy > 0)){
             this.vy *= -1;
         }
     }

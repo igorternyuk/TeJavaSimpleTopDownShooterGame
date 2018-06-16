@@ -27,6 +27,10 @@ public class Enemy extends Entity{
         --this.lives;
     }
     
+    public void hit(int damage){
+        this.lives -= damage;
+    }
+    
     @Override
     public void update(double frameTime){
         super.update(frameTime);
