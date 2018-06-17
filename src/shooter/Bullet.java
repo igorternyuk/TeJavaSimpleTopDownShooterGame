@@ -21,10 +21,6 @@ public class Bullet extends Entity{
         return damage;
     }
     
-    public void destroy(){
-        this.lives = 0;
-    }
-    
     @Override
     public void update(double frameTime){
         super.update(frameTime);

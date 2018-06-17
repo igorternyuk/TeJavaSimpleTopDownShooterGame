@@ -111,6 +111,35 @@ public class Game extends JPanel implements KeyListener, Runnable{
         }
     }
     
+    private void addChanceForPowerUp(double x, double y){
+        double rand = this.random.nextDouble();
+        PowerUpType type = PowerUpType.ONE_LIFE;
+        boolean maybeAddPowerUp = false;
+        if(rand < 0.1){
+            type = PowerUpType.DOUBLE_POWER;
+            maybeAddPowerUp = true;
+        } else if(rand < 0.25){
+            type = PowerUpType.ONE_LIFE;
+            maybeAddPowerUp = true;
+        } else if(rand < 0.5){
+            type = PowerUpType.POWER;
+            maybeAddPowerUp = true;
+        }
+        if(maybeAddPowerUp){
+            this.entities.add(new PowerUp(this, x, y, type));
+        }
+    }
+    
+    private void handleDestroyedEnemy(Enemy e){
+        this.player.addScore(e.getRank());
+        addChanceForPowerUp(e.getX(), e.getY());
+    }
+    
+    private void collectPowerUp(PowerUp e) {
+        System.out.println("PowerUp collected");
+        e.destroy();
+    }
+    
     private void checkCollisions(){
         for(int i = 0; i < this.entities.size(); ++i){
             inner:
@@ -123,7 +152,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
                         Enemy e = (Enemy)second;
                         e.hit(b.getDamage());
                         if(!e.isAlive()){
-                            this.player.addScore(e.getRank());
+                            handleDestroyedEnemy(e);
                         }
                         b.destroy();
                     }
@@ -134,6 +163,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
                         e.hit(b.getDamage());
                         if(!e.isAlive()){
                             this.player.addScore(e.getRank());
+                            handleDestroyedEnemy(e);
                         }
                         b.destroy();
                     }
@@ -144,10 +174,18 @@ public class Game extends JPanel implements KeyListener, Runnable{
         
         for(int i = 0; i < this.entities.size(); ++i){
             Entity e = this.entities.get(i);
-            if(!this.player.equals(e) && e instanceof Enemy){
+            if(!this.player.equals(e)){
                 if(e.collides(this.player) && !this.player.isRecovering()){
-                    this.player.hit();
-                    break;
+                    if(e instanceof Enemy){
+                        this.player.hit();
+                        break;
+                    }
+                    
+                    if(e instanceof PowerUp){
+                        PowerUp p = (PowerUp)e;
+                        collectPowerUp(p);
+                        break;
+                    }
                 }
             }
         }
@@ -172,12 +210,17 @@ public class Game extends JPanel implements KeyListener, Runnable{
         if(this.waveStarted && enemyCount == 0){
             createEnemies();
         }
+        
+        //Remove the dead entities
         this.entities.removeIf(e -> !e.isAlive());
+        
+        //Update all entitites
         for(int i = this.entities.size() - 1; i >= 0; --i){
             this.entities.get(i).update(frameTime);
         }
+        
+        //Collision handling
         checkCollisions();
-        //System.out.println("Entity count = " + this.entities.size());
     }
     
     private void gameRender(){
@@ -222,7 +265,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
     
     private void drawPlayerScore(){
         g2.setFont(fontSmall);
-        g2.setColor(Color.pink);
+        g2.setColor(Color.red);
         String scoreStr = "SCORE: " + this.player.getScore();
         int width = (int)g2.getFontMetrics().getStringBounds(scoreStr, g2).getWidth();
         g2.drawString(scoreStr, WINDOW_WIDTH - width - 5, 30);
@@ -273,4 +316,6 @@ public class Game extends JPanel implements KeyListener, Runnable{
             this.player.setFiring(false);
         }
     }
+
+    
 }
