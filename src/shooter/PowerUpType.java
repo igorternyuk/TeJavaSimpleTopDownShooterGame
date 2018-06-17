@@ -9,7 +9,7 @@ import java.awt.Color;
 public enum PowerUpType {
     ONE_LIFE(10, 50, new Color(182, 255, 0)),
     POWER(20, 75, Color.yellow),
-    DOUBLE_POWER(40, 100, new Color(255, 65, 0));
+    DOUBLE_POWER(30, 100, new Color(255, 65, 0));
     
     private int radius;
     private int speed;

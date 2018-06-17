@@ -1,5 +1,6 @@
 package shooter;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -132,11 +133,24 @@ public class Game extends JPanel implements KeyListener, Runnable{
     
     private void handleDestroyedEnemy(Enemy e){
         this.player.addScore(e.getRank());
+        this.player.addKilledEnemy();
         addChanceForPowerUp(e.getX(), e.getY());
     }
     
     private void collectPowerUp(PowerUp e) {
-        System.out.println("PowerUp collected");
+        //System.out.println("PowerUp collected");
+        PowerUpType type = e.getType();
+        switch(type){
+            case ONE_LIFE:
+                this.player.gainLife();
+                break;
+            case POWER:
+                this.player.increasePower(1);
+                break;
+            case DOUBLE_POWER:
+                this.player.increasePower(2);
+                break;
+        }
         e.destroy();
     }
     
@@ -232,7 +246,9 @@ public class Game extends JPanel implements KeyListener, Runnable{
         this.g2.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         this.entities.forEach(e -> e.draw(g2));
         drawPlayerLifes();
+        drawPlayerPower();
         drawPlayerScore();
+        drawKilledEnemyCount();
         drawWave();        
     }
     
@@ -265,10 +281,29 @@ public class Game extends JPanel implements KeyListener, Runnable{
     
     private void drawPlayerScore(){
         g2.setFont(fontSmall);
-        g2.setColor(Color.red);
+        g2.setColor(Color.green.darker().darker());
         String scoreStr = "SCORE: " + this.player.getScore();
         int width = (int)g2.getFontMetrics().getStringBounds(scoreStr, g2).getWidth();
         g2.drawString(scoreStr, WINDOW_WIDTH - width - 5, 30);
+    }
+    
+    private void drawPlayerPower(){
+        g2.setColor(Color.yellow);
+        g2.fillRect(30, 80, 30 * this.player.getPower(), 30);
+        g2.setStroke(new BasicStroke(3));
+        g2.setColor(Color.yellow.darker());
+        for(int i = 0; i < this.player.getRequiredPower(); ++i){
+            g2.drawRect(30 * (i + 1), 80, 30, 30);
+        }
+        g2.setStroke(new BasicStroke(1));
+    }
+    
+    private void drawKilledEnemyCount(){
+        g2.setFont(fontSmall);
+        g2.setColor(Color.red.darker());
+        String scoreStr = "KILLED ENEMIES: " + this.player.getKilledEnemyCount();
+        int width = (int)g2.getFontMetrics().getStringBounds(scoreStr, g2).getWidth();
+        g2.drawString(scoreStr, WINDOW_WIDTH - width - 5, 60);
     }
     
     private void gameDraw(){

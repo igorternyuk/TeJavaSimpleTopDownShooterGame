@@ -25,6 +25,10 @@ public class Player extends Entity{
     private long recoveryTimer = 0;
     private long elapsedForRecoveryTime = 0;
     private int score = 0;
+    private int killedEnemyCount = 0;
+    private int power = 0;
+    private int powerLevel = 1;
+    private int[] requiredPower = { 1, 2, 3, 4, 5};
     
     public Player(Game game) {
         super(game, Game.WINDOW_WIDTH / 2, Game.WINDOW_HEIGHT / 2,
@@ -52,33 +56,33 @@ public class Player extends Entity{
     }
 
     public boolean isMovingUp() {
-        return movingUp;
+        return this.movingUp;
     }
 
     public boolean isMovingDown() {
-        return movingDown;
+        return this.movingDown;
     }
 
     public boolean isMovingLeft() {
-        return movingLeft;
+        return this.movingLeft;
     }
 
     public boolean isMovingRight() {
-        return movingRight;
+        return this.movingRight;
     }
 
     public boolean isFiring() {
-        return firing;
+        return this.firing;
     }
 
     public boolean isRecovering() {
-        return recovering;
+        return this.recovering;
     }
 
     public int getScore() {
-        return score;
+        return this.score;
     }
-
+    
     public void resetScore() {
         this.score = 0;
     }
@@ -87,9 +91,50 @@ public class Player extends Entity{
         this.score += increment;
     }
     
+    public void gainLife(){
+        ++this.lives;
+    }
+    
+    public void addKilledEnemy(){
+        ++this.killedEnemyCount;
+    }
+
+    public int getPower() {
+        return this.power;
+    }
+
+    public int getPowerLevel() {
+        return this.powerLevel;
+    }
+    
+    public int getRequiredPower(){
+        return this.requiredPower[this.powerLevel];
+    }
+
+    public int getKilledEnemyCount() {
+        return this.killedEnemyCount;
+    }
+    
+    public void increasePower(int powerAmount){
+        this.power += powerAmount;
+        if(this.power > this.requiredPower[this.powerLevel]){
+            if(this.powerLevel + 1 < this.requiredPower.length){
+                ++this.powerLevel;
+                this.power -= this.requiredPower[this.powerLevel];
+            }
+        }
+    }
+    
+    private void fire(){
+        this.game.getEntities().add(new Bullet(this.game, this.x,
+                            this.y, BULLET_SPEED, -90, BULLET_DAMAGE));
+    }
+    
     @Override
     public void hit(){
         super.hit();
+        this.powerLevel = 1;
+        this.power = 0;
         this.recovering = true;
         this.color = RECOVERY_COLOR;
         this.recoveryTimer = System.nanoTime();
@@ -122,8 +167,7 @@ public class Player extends Entity{
             //System.out.println("We are not recovering now");
             if(this.firing){
                 if((System.nanoTime() - this.lastShotTime) / 1000000 > SHOT_DELAY){
-                    this.game.getEntities().add(new Bullet(this.game, this.x,
-                            this.y, BULLET_SPEED, -90, BULLET_DAMAGE));
+                    fire();
                     this.lastShotTime = System.nanoTime();
                 }
             }
