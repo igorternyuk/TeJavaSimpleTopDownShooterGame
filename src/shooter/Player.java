@@ -126,8 +126,23 @@ public class Player extends Entity{
     }
     
     private void fire(){
-        this.game.getEntities().add(new Bullet(this.game, this.x,
+        
+        if(this.powerLevel < 2){
+            this.game.getEntities().add(new Bullet(this.game, this.x,
                             this.y, BULLET_SPEED, -90, BULLET_DAMAGE));
+        } else if(this.powerLevel < 4){
+            this.game.getEntities().add(new Bullet(this.game, this.x - 5,
+                            this.y, BULLET_SPEED, -90, BULLET_DAMAGE));
+            this.game.getEntities().add(new Bullet(this.game, this.x + 5,
+                            this.y, BULLET_SPEED, -90, BULLET_DAMAGE));
+        } else {
+            this.game.getEntities().add(new Bullet(this.game, this.x - 5,
+                            this.y, BULLET_SPEED, -95, BULLET_DAMAGE));
+            this.game.getEntities().add(new Bullet(this.game, this.x,
+                            this.y, BULLET_SPEED, -90, BULLET_DAMAGE));
+            this.game.getEntities().add(new Bullet(this.game, this.x + 5,
+                            this.y, BULLET_SPEED, -85, BULLET_DAMAGE));
+        }
     }
     
     @Override

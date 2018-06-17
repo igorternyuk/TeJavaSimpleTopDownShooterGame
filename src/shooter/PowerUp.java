@@ -44,9 +44,8 @@ public class PowerUp extends Entity{
                     * this.blinkTimeElapsed / BLINK_PERIOD));
         if(alpha < 0) alpha = 0;
         if(alpha > 255) alpha = 255;
-        this.color = new Color(this.color.getRed(), this.color.getGreen(),
-                this.color.getBlue(), alpha);
-            
+        g.setColor(new Color(this.color.getRed(), this.color.getGreen(),
+                this.color.getBlue(), alpha));
         g.fillRect((int)this.x - this.radius, (int)this.y - this.radius,
                 2 * this.radius, 2 * this.radius);
         g.setColor(this.color.darker());

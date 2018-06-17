@@ -134,6 +134,9 @@ public class Game extends JPanel implements KeyListener, Runnable{
     private void handleDestroyedEnemy(Enemy e){
         this.player.addScore(e.getRank());
         this.player.addKilledEnemy();
+        if(e.getType().equals(EnemyType.EXPLODABLE)){
+            e.explode();
+        }
         addChanceForPowerUp(e.getX(), e.getY());
     }
     
@@ -272,10 +275,14 @@ public class Game extends JPanel implements KeyListener, Runnable{
     }
     
     private void drawPlayerLifes(){
+        g2.setFont(fontSmall);
+        g2.setColor(Color.blue.brighter());
+        String livesStr = "LIVES: ";
+        g2.drawString(livesStr, 30, 60);
         int lifeCount = this.player.getLives();
         g2.setColor(colorPlayersLife);
         for(int i = 0; i < lifeCount; ++i){
-            g2.fillOval(40 * (i + 1), 40, 30, 30);
+            g2.fillOval(40 * (i + 1) - 10, 80, 30, 30);
         }
     }
     
@@ -288,12 +295,16 @@ public class Game extends JPanel implements KeyListener, Runnable{
     }
     
     private void drawPlayerPower(){
+        g2.setFont(fontSmall);
+        g2.setColor(Color.orange.brighter());
+        String powerStr = "POWER: ";
+        g2.drawString(powerStr, 30, 145);
         g2.setColor(Color.yellow);
-        g2.fillRect(30, 80, 30 * this.player.getPower(), 30);
+        g2.fillRect(30, 160, 30 * this.player.getPower(), 30);
         g2.setStroke(new BasicStroke(3));
         g2.setColor(Color.yellow.darker());
         for(int i = 0; i < this.player.getRequiredPower(); ++i){
-            g2.drawRect(30 * (i + 1), 80, 30, 30);
+            g2.drawRect(30 * (i + 1), 160, 30, 30);
         }
         g2.setStroke(new BasicStroke(1));
     }

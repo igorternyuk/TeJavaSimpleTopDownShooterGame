@@ -22,6 +22,13 @@ public class Enemy extends Entity{
         this.vx = this.speed * Math.cos(angleInRadians);
         this.vy = this.speed * Math.sin(angleInRadians);
     }
+    
+    public Enemy(Game game, EnemyType type, double x, double y, int radius){
+        this(game, type);
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+    }
 
     public EnemyType getType() {
         return type;
@@ -34,7 +41,18 @@ public class Enemy extends Entity{
         return isReady;
     }
     
-
+    public void explode(){
+        this.radius *= 0.5;
+        if(this.radius < 5){
+            this.destroy();
+        } else {
+            for(int i = 0; i < 2; ++i){
+                this.game.getEntities().add(new Enemy(this.game, this.type,
+                        this.x, this.y, this.radius));
+            }
+        }
+        
+    }
     
     @Override
     public void update(double frameTime){

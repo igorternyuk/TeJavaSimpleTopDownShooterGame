@@ -11,8 +11,9 @@ public enum EnemyType {
     MIDDLE(Color.orange, 15, 60, 2, 5),
     STRONG(Color.pink, 20, 80, 3, 7),
     FAST_BUT_WEAK(Color.red, 10, 100, 2, 4),
-    SLOW_BUT_HARD_TO_KILL(Color.green.darker(), 30, 20, 10, 12);
-    
+    SLOW_BUT_HARD_TO_KILL(Color.green.darker(), 30, 20, 10, 12),
+    EXPLODABLE(Color.magenta, 40, 80, 5, 10);
+
     private Color color;
     private int radius;
     private int speed;
