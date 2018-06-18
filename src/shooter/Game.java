@@ -123,6 +123,9 @@ public class Game extends JPanel implements KeyListener, Runnable{
         if(rand < 0.05){
             type = PowerUpType.ONE_LIFE;
             maybeAddPowerUp = true;
+        } else if(rand < 0.08) {
+            type = PowerUpType.SLOWDOWN;
+            maybeAddPowerUp = true;
         } else if(rand < 0.10){
             type = PowerUpType.DOUBLE_POWER;
             maybeAddPowerUp = true;
@@ -133,6 +136,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
             type = PowerUpType.SLOWDOWN;
             maybeAddPowerUp = true;
         }
+        
         if(maybeAddPowerUp){
             this.entities.add(new PowerUp(this, x, y, type));
         }
@@ -152,10 +156,11 @@ public class Game extends JPanel implements KeyListener, Runnable{
                 this.player.increasePower(2);
                 break;
             case SLOWDOWN:
-                System.out.println("Collected slowdown powerup");
                 setEnemySlowdown(true);
                 break;
         }
+        this.entities.add(new Text(this, e.getX(), e.getY(), type.getText(),
+                type.getColor(), this.fontSmall, 2000, 4));
         e.destroy();
     }
     
@@ -362,11 +367,14 @@ public class Game extends JPanel implements KeyListener, Runnable{
     
     private void drawEnemySlowDown(){
         g2.setColor(Color.white);
+        g2.setFont(fontSmall);
+        String text = "SLOWDOWN: ";
+        g2.drawString(text, 30, 215);
         g2.setStroke(new BasicStroke(3));
-        g2.drawRect(30, 200, 100, 30);
+        g2.drawRect(30, 240, 100, 30);
         g2.setStroke(new BasicStroke(1));
         int currWidth = (int)(100 * (SLOWDOWN_TIME - this.slowDownTimerDiff) / SLOWDOWN_TIME);
-        g2.fillRect(30, 200, currWidth, 30);
+        g2.fillRect(30, 240, currWidth, 30);
     }
     
     private void gameDraw(){
