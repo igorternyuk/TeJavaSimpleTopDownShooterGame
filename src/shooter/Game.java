@@ -23,6 +23,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
     static final int WINDOW_WIDTH = 600;
     static final int WINDOW_HEIGHT = 600;
     private static final double FPS = 30;
+    private static final int SLOWDOWN_TIME = 6000;
     private Random random = new Random();
     private Thread thread;
     private boolean isRunning;
@@ -40,6 +41,9 @@ public class Game extends JPanel implements KeyListener, Runnable{
     private long waveTimeDiff = 0;
     private boolean waveStarted = false;
     private int waveNumber = 0;
+    private boolean enemySlowdown = false;
+    private long slowDownTimer = 0;
+    private long slowDownTimerDiff = 0;
     
     public Game() {
         super();
@@ -125,6 +129,9 @@ public class Game extends JPanel implements KeyListener, Runnable{
         } else if(rand < 0.20){
             type = PowerUpType.POWER;
             maybeAddPowerUp = true;
+        } else {
+            type = PowerUpType.SLOWDOWN;
+            maybeAddPowerUp = true;
         }
         if(maybeAddPowerUp){
             this.entities.add(new PowerUp(this, x, y, type));
@@ -144,8 +151,21 @@ public class Game extends JPanel implements KeyListener, Runnable{
             case DOUBLE_POWER:
                 this.player.increasePower(2);
                 break;
+            case SLOWDOWN:
+                System.out.println("Collected slowdown powerup");
+                setEnemySlowdown(true);
+                break;
         }
         e.destroy();
+    }
+    
+    private void setEnemySlowdown(boolean slowdown){
+        this.enemySlowdown = slowdown;
+        this.slowDownTimer = System.nanoTime();
+        this.entities.stream().filter(e -> e instanceof Enemy).forEach(e -> {
+            Enemy enemy = (Enemy)e;
+            enemy.setSlowdown(slowdown);
+        });
     }
     
     private void handleBulletEnemyCollision(Bullet b, Enemy e) {
@@ -230,6 +250,16 @@ public class Game extends JPanel implements KeyListener, Runnable{
             createEnemies();
         }
         
+        if(this.enemySlowdown){
+            this.slowDownTimerDiff = (System.nanoTime() - this.slowDownTimer) / 1000000;
+            if(this.slowDownTimerDiff >= SLOWDOWN_TIME){
+                this.enemySlowdown = false;
+                this.slowDownTimer = 0;
+                this.slowDownTimerDiff = 0;
+                setEnemySlowdown(false);
+            }            
+        }
+        
         //Remove the dead entities
         this.entities.removeIf(e -> !e.isAlive());
         
@@ -249,12 +279,23 @@ public class Game extends JPanel implements KeyListener, Runnable{
                     RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         this.g2.setColor(this.colorBackground);
         this.g2.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        
+        //Draw transparent layer in the slowdown mode
+        if(this.enemySlowdown){
+            this.g2.setColor(new Color(255,255,255,64));
+            this.g2.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        }
+        
+        //Draw all entities
         this.entities.forEach(e -> e.draw(g2));
+        
         drawPlayerLifes();
         drawPlayerPower();
         drawPlayerScore();
         drawKilledEnemyCount();
-        drawWave();        
+        drawWave();
+        if(this.enemySlowdown)
+            drawEnemySlowDown();
     }
     
     private void drawWave(){
@@ -317,6 +358,15 @@ public class Game extends JPanel implements KeyListener, Runnable{
         String scoreStr = "KILLED ENEMIES: " + this.player.getKilledEnemyCount();
         int width = (int)g2.getFontMetrics().getStringBounds(scoreStr, g2).getWidth();
         g2.drawString(scoreStr, WINDOW_WIDTH - width - 5, 60);
+    }
+    
+    private void drawEnemySlowDown(){
+        g2.setColor(Color.white);
+        g2.setStroke(new BasicStroke(3));
+        g2.drawRect(30, 200, 100, 30);
+        g2.setStroke(new BasicStroke(1));
+        int currWidth = (int)(100 * (SLOWDOWN_TIME - this.slowDownTimerDiff) / SLOWDOWN_TIME);
+        g2.fillRect(30, 200, currWidth, 30);
     }
     
     private void gameDraw(){

@@ -29,6 +29,7 @@ public class Player extends Entity{
     private int power = 0;
     private int powerLevel = 1;
     private int[] requiredPower = { 1, 2, 3, 4, 5};
+
     
     public Player(Game game) {
         super(game, Game.WINDOW_WIDTH / 2, Game.WINDOW_HEIGHT / 2,
@@ -114,7 +115,7 @@ public class Player extends Entity{
     public int getKilledEnemyCount() {
         return this.killedEnemyCount;
     }
-    
+
     public void increasePower(int powerAmount){
         this.power += powerAmount;
         if(this.power > this.requiredPower[this.powerLevel]){
@@ -168,6 +169,7 @@ public class Player extends Entity{
             this.vy = this.speed;
         }
         
+       
         if(this.recovering){
             //System.out.println("We are recovering now");
             this.elapsedForRecoveryTime

@@ -11,6 +11,7 @@ import java.util.Random;
 public class Enemy extends Entity{
     private static final int MIN_RADIUS = 5;
     private static final int HIT_FLASH_TIME = 50;
+    private static final double SLOWDOWN_FACTOR = 0.3;
     private static final Color HIT_COLOR = Color.red;
     private static final int TOP_DIRECTION_ANGLE = 90;
     private static final int MIN_ANGLE = 30;
@@ -20,6 +21,7 @@ public class Enemy extends Entity{
     private boolean isHit = false;
     private long hitTimer = 0;
     private long hitFlashElapsedTime = 0;
+    private boolean slowdown = false;
     
     public Enemy(Game game, EnemyType type) {
         super(game, Math.random() * (Game.WINDOW_WIDTH - type.getRadius())
@@ -52,17 +54,23 @@ public class Enemy extends Entity{
         return ready;
     }
     
+    public boolean isSlowdown() {
+        return this.slowdown;
+    }
+
+    public void setSlowdown(boolean slowdown) {
+        this.slowdown = slowdown;
+    }
+    
+    
     public void explode(){
         int factor = this.type.getExplosionFactor();
-        System.out.println("Trying to explode factor = " + factor);
         this.radius /= factor;
         System.out.println("radius = " + radius);
         if(this.radius <= MIN_RADIUS){
-            System.out.println("The radius is too small.Destroying the enemy.");
             this.destroy();
         } else {
             for(int i = 0; i < factor; ++i){
-                System.out.println("Creating the enemy number " + (i + 1));
                 Enemy enemy = new Enemy(this.game, this.type,
                         this.x, this.y, this.radius);
                 enemy.lives = enemy.type.getLives() / factor;
@@ -78,10 +86,17 @@ public class Enemy extends Entity{
         this.hitTimer = System.nanoTime();
     }
     
+    //frameTime in seconds
     @Override
     public void update(double frameTime){
-        super.update(frameTime);
+        if(this.slowdown){
+            this.x += SLOWDOWN_FACTOR * this.vx * frameTime;
+            this.y += SLOWDOWN_FACTOR * this.vy * frameTime;
+        } else {
+            super.update(frameTime);
+        }
         bounceFromWalls();
+        
         if(!this.ready && this.y > this.radius){
             this.ready = true;
         }
