@@ -25,15 +25,16 @@ public class Game extends JPanel implements KeyListener, Runnable{
     private static final double FPS = 30;
     private static final int SLOWDOWN_TIME = 6000;
     private static final long WAVE_DELAY = 2000;
+    private static final int MAX_WAVES = 10;
     private Random random = new Random();
     private Thread thread;
     private boolean isRunning;
     private BufferedImage canvas;
     private Graphics2D g2;
     private Font fontSmall = new Font("Tahoma", Font.BOLD, 24);
-    private Font fontLarge = new Font("Verdana", Font.BOLD | Font.ITALIC, 40);
+    private Font fontLarge = new Font("Verdana", Font.BOLD | Font.ITALIC, 48);
     private Color colorBackground = new Color(0,148,255);
-    private Color colorPlayersLife = Color.green;
+    private Color colorPlayersLife = Color.green.darker();
     private Color colorWave = Color.white;
     private List<Entity> entities = new ArrayList<>();
     private Player player;    
@@ -152,9 +153,6 @@ public class Game extends JPanel implements KeyListener, Runnable{
         } else if(rand < 0.20){
             type = PowerUpType.POWER;
             maybeAddPowerUp = true;
-        } else {
-            type = PowerUpType.SLOWDOWN;
-            maybeAddPowerUp = true;
         }
         
         if(maybeAddPowerUp){
@@ -206,8 +204,8 @@ public class Game extends JPanel implements KeyListener, Runnable{
     private void handleDestroyedEnemy(Enemy e){
         this.player.addScore(e.getRank());
         this.player.addKilledEnemy();
-        if(e.getType().isExplodable()){
-            e.explode();
+        if(e.getType().isSplittable()){
+            e.split();
         }
         addChanceForPowerUp(e.getX(), e.getY());
         this.entities.add(new Explosion(this, e.getX(), e.getY(), e.getRadius()));
@@ -255,6 +253,16 @@ public class Game extends JPanel implements KeyListener, Runnable{
         }
     }
     
+    private void checkGameState(){
+        if(!this.player.isAlive()){
+            this.gameState = GameState.DEFEAT;
+        } else {
+            if(this.waveNumber > MAX_WAVES){
+                this.gameState = GameState.VICTORY; 
+            }
+        }
+    }
+    
     private void gameUpdate(final double frameTime){
         long enemyCount = this.entities.stream()
                 .filter(e -> e instanceof Enemy).count();
@@ -263,8 +271,9 @@ public class Game extends JPanel implements KeyListener, Runnable{
             this.waveStarted = false;
             this.waveStartTime = System.nanoTime();
         } else {
-            this.waveTimeDiff = (System.nanoTime() - this.waveStartTime) / 1000000;
-            if(this.waveTimeDiff > this.WAVE_DELAY){
+            this.waveTimeDiff
+                    = (System.nanoTime() - this.waveStartTime) / 1000000;
+            if(this.waveTimeDiff > WAVE_DELAY){
                 this.waveStarted = true;
                 this.waveStartTime = 0;
                 this.waveTimeDiff = 0;
@@ -276,7 +285,8 @@ public class Game extends JPanel implements KeyListener, Runnable{
         }
         
         if(this.enemySlowdown){
-            this.slowDownTimerDiff = (System.nanoTime() - this.slowDownTimer) / 1000000;
+            this.slowDownTimerDiff
+                    = (System.nanoTime() - this.slowDownTimer) / 1000000;
             if(this.slowDownTimerDiff >= SLOWDOWN_TIME){
                 this.enemySlowdown = false;
                 this.slowDownTimer = 0;
@@ -286,7 +296,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
         }
         
         //Remove the dead entities
-        this.entities.removeIf(e -> !e.isAlive());
+        this.entities.removeIf(e -> e != this.player && !e.isAlive());
         
         //Update all entitites
         for(int i = this.entities.size() - 1; i >= 0; --i){
@@ -295,6 +305,9 @@ public class Game extends JPanel implements KeyListener, Runnable{
         
         //Collision handling
         checkCollisions();
+        
+        //Check if game over
+        checkGameState();
     }
     
     private void gameRender(){
@@ -318,6 +331,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
         drawPlayerPower();
         drawPlayerScore();
         drawKilledEnemyCount();
+        drawCurrentWaveNumber();
         drawWave();
         if(this.enemySlowdown)
             drawEnemySlowDown();
@@ -328,7 +342,8 @@ public class Game extends JPanel implements KeyListener, Runnable{
         g2.setFont(fontLarge);
         g2.setColor(this.gameState.getColor());
         String text = this.gameState.getText();
-        int textWidth = (int)g2.getFontMetrics().getStringBounds(text, g2).getWidth();
+        int textWidth = (int)g2.getFontMetrics().getStringBounds(text, g2)
+                .getWidth();
         g2.drawString(text, (WINDOW_WIDTH - textWidth) / 2, WINDOW_HEIGHT / 2);
     }
     
@@ -340,7 +355,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
             int messageHeight = (int)rect.getHeight();
             int messageWidth = (int)rect.getWidth();
             int alpha = (int)(255 * Math.sin(Math.PI
-                    * this.waveTimeDiff / this.WAVE_DELAY));
+                    * this.waveTimeDiff / WAVE_DELAY));
             if(alpha < 0) alpha = 0;
             if(alpha > 255) alpha = 255;
             g2.setColor(new Color(colorWave.getRed(), colorWave.getGreen(),
@@ -367,7 +382,8 @@ public class Game extends JPanel implements KeyListener, Runnable{
         g2.setFont(fontSmall);
         g2.setColor(Color.green.darker().darker());
         String scoreStr = "SCORE: " + this.player.getScore();
-        int width = (int)g2.getFontMetrics().getStringBounds(scoreStr, g2).getWidth();
+        int width = (int)g2.getFontMetrics().getStringBounds(scoreStr, g2)
+                .getWidth();
         g2.drawString(scoreStr, WINDOW_WIDTH - width - 5, 30);
     }
     
@@ -390,8 +406,18 @@ public class Game extends JPanel implements KeyListener, Runnable{
         g2.setFont(fontSmall);
         g2.setColor(Color.red.darker());
         String scoreStr = "KILLED ENEMIES: " + this.player.getKilledEnemyCount();
-        int width = (int)g2.getFontMetrics().getStringBounds(scoreStr, g2).getWidth();
+        int width = (int)g2.getFontMetrics().getStringBounds(scoreStr, g2)
+                .getWidth();
         g2.drawString(scoreStr, WINDOW_WIDTH - width - 5, 60);
+    }
+    
+    private void drawCurrentWaveNumber(){
+        g2.setFont(fontSmall);
+        g2.setColor(Color.blue);
+        String text = "WAVE NUMBER: " + this.waveNumber;
+        int textWidth = (int)g2.getFontMetrics().getStringBounds(text, g2)
+                .getWidth();
+        g2.drawString(text, WINDOW_WIDTH - textWidth - 5, 90);
     }
     
     private void drawEnemySlowDown(){
@@ -402,7 +428,8 @@ public class Game extends JPanel implements KeyListener, Runnable{
         g2.setStroke(new BasicStroke(3));
         g2.drawRect(30, 240, 100, 30);
         g2.setStroke(new BasicStroke(1));
-        int currWidth = (int)(100 * (SLOWDOWN_TIME - this.slowDownTimerDiff) / SLOWDOWN_TIME);
+        int currWidth = (int)(100 * (SLOWDOWN_TIME - this.slowDownTimerDiff)
+                / SLOWDOWN_TIME);
         g2.fillRect(30, 240, currWidth, 30);
     }
     
@@ -466,6 +493,4 @@ public class Game extends JPanel implements KeyListener, Runnable{
             this.player.setFiring(false);
         }
     }
-
-    
 }

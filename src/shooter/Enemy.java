@@ -63,8 +63,8 @@ public class Enemy extends Entity{
     }
     
     
-    public void explode(){
-        int factor = this.type.getExplosionFactor();
+    public void split(){
+        int factor = this.type.getSplitFactor();
         this.radius /= factor;
         if(this.radius <= MIN_RADIUS){
             this.destroy();

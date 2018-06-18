@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
  * @author igor
  */
 public class Player extends Entity{
+    private static final int LIVES = 3;
     private static final int RADIUS = 16;
     private static final int BULLET_SPEED = 125;
     private static final int BULLET_DAMAGE = 1;
@@ -32,7 +33,7 @@ public class Player extends Entity{
     
     public Player(Game game) {
         super(game, Game.WINDOW_WIDTH / 2, Game.WINDOW_HEIGHT / 2,
-              RADIUS, 130, 3, REGULAR_COLOR);
+              RADIUS, 130, LIVES, REGULAR_COLOR);
     }
     
     public void reset(){
@@ -52,6 +53,7 @@ public class Player extends Entity{
         this.elapsedForRecoveryTime = 0;
         this.recovering = false;
         this.firing = false;
+        this.lives = LIVES;
     }
 
     public void setMovingUp(boolean movingUp) {
