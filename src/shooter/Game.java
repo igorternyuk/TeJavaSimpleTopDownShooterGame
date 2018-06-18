@@ -24,6 +24,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
     static final int WINDOW_HEIGHT = 600;
     private static final double FPS = 30;
     private static final int SLOWDOWN_TIME = 6000;
+    private static final long WAVE_DELAY = 2000;
     private Random random = new Random();
     private Thread thread;
     private boolean isRunning;
@@ -35,8 +36,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
     private Color colorPlayersLife = Color.green;
     private Color colorWave = Color.white;
     private List<Entity> entities = new ArrayList<>();
-    private Player player;
-    private long waveDelay = 2000;
+    private Player player;    
     private long waveStartTime = 0;
     private long waveTimeDiff = 0;
     private boolean waveStarted = false;
@@ -44,6 +44,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
     private boolean enemySlowdown = false;
     private long slowDownTimer = 0;
     private long slowDownTimerDiff = 0;
+    private GameState gameState = GameState.PLAY;
     
     public Game() {
         super();
@@ -71,6 +72,27 @@ public class Game extends JPanel implements KeyListener, Runnable{
             this.thread.start();
         }
     }
+    
+    private void startNewGame(){
+        this.player.reset();
+        this.entities.removeIf(e -> e != this.player);
+        this.waveStartTime = 0;
+        this.waveTimeDiff = 0;
+        this.waveStarted = false;
+        this.waveNumber = 0;
+        this.enemySlowdown = false;
+        this.slowDownTimer = 0;
+        this.slowDownTimerDiff = 0;
+        this.gameState = GameState.PLAY;
+    }
+    
+    private void togglePause(){
+        if(this.gameState.equals(GameState.PLAY)){
+            this.gameState = GameState.PAUSED;
+        } else if(this.gameState.equals(GameState.PAUSED)){
+            this.gameState = GameState.PLAY;
+        }
+    }
 
     @Override
     public void run() {
@@ -92,19 +114,17 @@ public class Game extends JPanel implements KeyListener, Runnable{
         
         while(this.isRunning){
             startTime = System.nanoTime();
-            //System.out.println("startTime = " + startTime);
             timeSinceLastUpdate += elapsedTime;
-            //System.out.println("timeSinceLastUpdate = " + timeSinceLastUpdate);
             while(timeSinceLastUpdate > frameTime){
-                gameUpdate(frameTime);
+                if(gameState.equals(GameState.PLAY)){
+                    gameUpdate(frameTime);
+                }
                 timeSinceLastUpdate -= frameTime;
             }
             gameRender();
             gameDraw();
             endTime = System.nanoTime();
-            //System.out.println("endTime = " + endTime);
             elapsedTime = (endTime - startTime) * 1e-9;
-            //System.out.println("Elapsed time = " + elapsedTime);
         }
     }
     
@@ -244,7 +264,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
             this.waveStartTime = System.nanoTime();
         } else {
             this.waveTimeDiff = (System.nanoTime() - this.waveStartTime) / 1000000;
-            if(this.waveTimeDiff > this.waveDelay){
+            if(this.waveTimeDiff > this.WAVE_DELAY){
                 this.waveStarted = true;
                 this.waveStartTime = 0;
                 this.waveTimeDiff = 0;
@@ -301,6 +321,15 @@ public class Game extends JPanel implements KeyListener, Runnable{
         drawWave();
         if(this.enemySlowdown)
             drawEnemySlowDown();
+        drawGameState();
+    }
+    
+    private void drawGameState(){
+        g2.setFont(fontLarge);
+        g2.setColor(this.gameState.getColor());
+        String text = this.gameState.getText();
+        int textWidth = (int)g2.getFontMetrics().getStringBounds(text, g2).getWidth();
+        g2.drawString(text, (WINDOW_WIDTH - textWidth) / 2, WINDOW_HEIGHT / 2);
     }
     
     private void drawWave(){
@@ -311,7 +340,7 @@ public class Game extends JPanel implements KeyListener, Runnable{
             int messageHeight = (int)rect.getHeight();
             int messageWidth = (int)rect.getWidth();
             int alpha = (int)(255 * Math.sin(Math.PI
-                    * this.waveTimeDiff / this.waveDelay));
+                    * this.waveTimeDiff / this.WAVE_DELAY));
             if(alpha < 0) alpha = 0;
             if(alpha > 255) alpha = 255;
             g2.setColor(new Color(colorWave.getRed(), colorWave.getGreen(),
@@ -408,6 +437,21 @@ public class Game extends JPanel implements KeyListener, Runnable{
     @Override
     public void keyReleased(KeyEvent e) {
         int keyCode = e.getKeyCode();
+        
+        switch (keyCode) {
+            case KeyEvent.VK_P:
+                togglePause();
+                break;
+            case KeyEvent.VK_N:
+                startNewGame();
+                break;
+            case KeyEvent.VK_Q:
+                this.isRunning = false;
+                break;
+            default:
+                break;
+        }
+        
         if(keyCode == KeyEvent.VK_LEFT){
             this.player.setMovingLeft(false);
         } else if(keyCode == KeyEvent.VK_RIGHT){

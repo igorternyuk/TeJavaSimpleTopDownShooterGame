@@ -29,11 +29,29 @@ public class Player extends Entity{
     private int power = 0;
     private int powerLevel = 1;
     private int[] requiredPower = { 1, 2, 3, 4, 5};
-
     
     public Player(Game game) {
         super(game, Game.WINDOW_WIDTH / 2, Game.WINDOW_HEIGHT / 2,
               RADIUS, 130, 3, REGULAR_COLOR);
+    }
+    
+    public void reset(){
+        this.x = Game.WINDOW_WIDTH / 2;
+        this.y = Game.WINDOW_HEIGHT / 2;
+        this.vx = 0;
+        this.vy = 0;
+        this.movingLeft = false;
+        this.movingRight = false;
+        this.movingUp = false;
+        this.movingDown = false;
+        this.power = 0;
+        this.powerLevel = 1;
+        this.score = 0;
+        this.killedEnemyCount = 0;
+        this.recoveryTimer = 0;
+        this.elapsedForRecoveryTime = 0;
+        this.recovering = false;
+        this.firing = false;
     }
 
     public void setMovingUp(boolean movingUp) {

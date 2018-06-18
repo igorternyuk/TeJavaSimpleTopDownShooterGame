@@ -35,17 +35,14 @@ public class Text extends Entity{
     
     @Override
     public void draw(Graphics2D g){
-        /*
-        int alpha = (int)(255 * Math.sin(Math.PI
-                    * this.elapsedForRecoveryTime / RECOVERY_TIME));
-        */
         int alpha = (int)(255 * Math.sin(Math.PI * this.blinkTimerDiff / this.time * this.blinkCount));
         if(alpha < 0) alpha = 0;
         if(alpha > 255) alpha = 255;
         g.setFont(this.font);
         g.setColor(new Color(this.color.getRed(), this.color.getGreen(),
                 this.color.getBlue(), alpha));
-        g.drawString(this.text, (int)this.x, (int)this.y);
+        int textWidth = (int)g.getFontMetrics().getStringBounds(this.text, g).getWidth();
+        g.drawString(this.text, (int)(this.x - textWidth / 2), (int)this.y);
     }
     
 }
