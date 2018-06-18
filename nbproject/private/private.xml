@@ -4,9 +4,12 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/Entity.java</file>
+            <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/Explosion.java</file>
             <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/Game.java</file>
             <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/EnemyType.java</file>
+            <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/PowerUp.java</file>
             <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/Bullet.java</file>
+            <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/PowerUpType.java</file>
             <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/Player.java</file>
             <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/Main.java</file>
             <file>file:/home/igor/prj/java/TeJavaSimpleShooter/SimpleShooter/src/shooter/Enemy.java</file>

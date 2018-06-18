@@ -32,7 +32,7 @@ public class Player extends Entity{
     
     public Player(Game game) {
         super(game, Game.WINDOW_WIDTH / 2, Game.WINDOW_HEIGHT / 2,
-              RADIUS, 100, 3, REGULAR_COLOR);
+              RADIUS, 130, 3, REGULAR_COLOR);
     }
 
     public void setMovingUp(boolean movingUp) {
@@ -126,7 +126,6 @@ public class Player extends Entity{
     }
     
     private void fire(){
-        
         if(this.powerLevel < 2){
             this.game.getEntities().add(new Bullet(this.game, this.x,
                             this.y, BULLET_SPEED, -90, BULLET_DAMAGE));

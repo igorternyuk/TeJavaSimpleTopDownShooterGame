@@ -116,28 +116,19 @@ public class Game extends JPanel implements KeyListener, Runnable{
         double rand = this.random.nextDouble();
         PowerUpType type = PowerUpType.ONE_LIFE;
         boolean maybeAddPowerUp = false;
-        if(rand < 0.1){
-            type = PowerUpType.DOUBLE_POWER;
-            maybeAddPowerUp = true;
-        } else if(rand < 0.25){
+        if(rand < 0.05){
             type = PowerUpType.ONE_LIFE;
             maybeAddPowerUp = true;
-        } else if(rand < 0.5){
+        } else if(rand < 0.10){
+            type = PowerUpType.DOUBLE_POWER;
+            maybeAddPowerUp = true;
+        } else if(rand < 0.20){
             type = PowerUpType.POWER;
             maybeAddPowerUp = true;
         }
         if(maybeAddPowerUp){
             this.entities.add(new PowerUp(this, x, y, type));
         }
-    }
-    
-    private void handleDestroyedEnemy(Enemy e){
-        this.player.addScore(e.getRank());
-        this.player.addKilledEnemy();
-        if(e.getType().equals(EnemyType.EXPLODABLE)){
-            e.explode();
-        }
-        addChanceForPowerUp(e.getX(), e.getY());
     }
     
     private void collectPowerUp(PowerUp e) {
@@ -157,6 +148,26 @@ public class Game extends JPanel implements KeyListener, Runnable{
         e.destroy();
     }
     
+    private void handleBulletEnemyCollision(Bullet b, Enemy e) {
+        if (e.isReady()) {
+            e.hit(b.getDamage());
+            if (!e.isAlive()) {
+                handleDestroyedEnemy(e);
+            }
+            b.destroy();
+        }
+    }
+    
+    private void handleDestroyedEnemy(Enemy e){
+        this.player.addScore(e.getRank());
+        this.player.addKilledEnemy();
+        if(e.getType().isExplodable()){
+            e.explode();
+        }
+        addChanceForPowerUp(e.getX(), e.getY());
+        this.entities.add(new Explosion(this, e.getX(), e.getY(), e.getRadius()));
+    }
+    
     private void checkCollisions(){
         for(int i = 0; i < this.entities.size(); ++i){
             inner:
@@ -167,22 +178,13 @@ public class Game extends JPanel implements KeyListener, Runnable{
                     if(first instanceof Bullet && second instanceof Enemy){
                         Bullet b = (Bullet)first;
                         Enemy e = (Enemy)second;
-                        e.hit(b.getDamage());
-                        if(!e.isAlive()){
-                            handleDestroyedEnemy(e);
-                        }
-                        b.destroy();
+                        handleBulletEnemyCollision(b, e);
                     }
 
                     if(first instanceof Enemy && second instanceof Bullet){
                         Bullet b = (Bullet)second;
                         Enemy e = (Enemy)first;
-                        e.hit(b.getDamage());
-                        if(!e.isAlive()){
-                            this.player.addScore(e.getRank());
-                            handleDestroyedEnemy(e);
-                        }
-                        b.destroy();
+                        handleBulletEnemyCollision(b, e);
                     }
                     break;
                 }

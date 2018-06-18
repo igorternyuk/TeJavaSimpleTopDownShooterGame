@@ -1,5 +1,7 @@
 package shooter;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.Random;
 
 /**
@@ -7,9 +9,17 @@ import java.util.Random;
  * @author igor
  */
 public class Enemy extends Entity{
-    private boolean isReady = false;
+    private static final int MIN_RADIUS = 5;
+    private static final int HIT_FLASH_TIME = 50;
+    private static final Color HIT_COLOR = Color.red;
+    private static final int TOP_DIRECTION_ANGLE = 90;
+    private static final int MIN_ANGLE = 30;
+    private boolean ready = false;
     private EnemyType type;
     private int rank;
+    private boolean isHit = false;
+    private long hitTimer = 0;
+    private long hitFlashElapsedTime = 0;
     
     public Enemy(Game game, EnemyType type) {
         super(game, Math.random() * (Game.WINDOW_WIDTH - type.getRadius())
@@ -18,7 +28,8 @@ public class Enemy extends Entity{
         this.type = type;
         this.rank = type.getRank();
         Random random = new Random();
-        double angleInRadians = Math.toRadians(random.nextInt(90) + 30);
+        double angleInRadians
+                = Math.toRadians(random.nextInt(TOP_DIRECTION_ANGLE) + MIN_ANGLE);
         this.vx = this.speed * Math.cos(angleInRadians);
         this.vy = this.speed * Math.sin(angleInRadians);
     }
@@ -37,29 +48,58 @@ public class Enemy extends Entity{
     public int getRank() {
         return rank;
     }
-    public boolean isIsReady() {
-        return isReady;
+    public boolean isReady() {
+        return ready;
     }
     
     public void explode(){
-        this.radius *= 0.5;
-        if(this.radius < 5){
+        int factor = this.type.getExplosionFactor();
+        System.out.println("Trying to explode factor = " + factor);
+        this.radius /= factor;
+        System.out.println("radius = " + radius);
+        if(this.radius <= MIN_RADIUS){
+            System.out.println("The radius is too small.Destroying the enemy.");
             this.destroy();
         } else {
-            for(int i = 0; i < 2; ++i){
-                this.game.getEntities().add(new Enemy(this.game, this.type,
-                        this.x, this.y, this.radius));
+            for(int i = 0; i < factor; ++i){
+                System.out.println("Creating the enemy number " + (i + 1));
+                Enemy enemy = new Enemy(this.game, this.type,
+                        this.x, this.y, this.radius);
+                enemy.lives = enemy.type.getLives() / factor;
+                this.game.getEntities().add(enemy);
             }
         }
-        
+    }
+    
+    @Override
+    public void hit(int damage){
+        super.hit(damage);
+        this.isHit = true;
+        this.hitTimer = System.nanoTime();
     }
     
     @Override
     public void update(double frameTime){
         super.update(frameTime);
         bounceFromWalls();
-        if(!this.isReady && this.y > this.radius){
-            this.isReady = true;
+        if(!this.ready && this.y > this.radius){
+            this.ready = true;
         }
+        
+        if(this.isHit){
+            this.hitFlashElapsedTime
+                    = (System.nanoTime() - this.hitTimer) / 1000000;
+            if(this.hitFlashElapsedTime >= HIT_FLASH_TIME){
+                this.isHit = false;
+                this.hitTimer = 0;
+                this.hitFlashElapsedTime = 0;
+            }
+        }
+    }
+    
+    @Override
+    public void draw(Graphics2D g){
+        this.color = this.isHit ? HIT_COLOR : this.type.getColor();
+        super.draw(g);
     }
 }

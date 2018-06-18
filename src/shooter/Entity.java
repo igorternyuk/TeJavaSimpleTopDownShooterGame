@@ -46,7 +46,7 @@ public class Entity {
         return lives;
     }
     
-        public void hit(){
+    public void hit(){
         --this.lives;
     }
     
@@ -110,11 +110,11 @@ public class Entity {
     }
     
     public void draw(Graphics2D g){
-        g.setColor(color);
+        g.setColor(this.color);
         g.fillOval((int)this.x - this.radius, (int)this.y - this.radius,
                 2 * this.radius, 2 * this.radius);
         g.setStroke(new BasicStroke(3));
-        g.setColor(color.darker());
+        g.setColor(this.color.darker());
         g.drawOval((int)this.x - this.radius, (int)this.y - this.radius,
                 2 * this.radius, 2 * this.radius);
         g.setStroke(new BasicStroke(1));
